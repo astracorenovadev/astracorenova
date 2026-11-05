@@ -24,14 +24,6 @@
 
   document.querySelector('.skip-link')?.addEventListener('click',()=>{const main=document.getElementById('main');main.tabIndex=-1;main.focus({preventScroll:true});});
 
-  document.getElementById('contact-form').addEventListener('submit', event => {
-    event.preventDefault();
-    const values = new FormData(event.currentTarget);
-    const text = `Ім’я / Name: ${values.get('name')}\nКомпанія / Company: ${values.get('company')}\nТелефон / Messenger: ${values.get('contact')}\n\nЗадача / Task:\n${values.get('task')}`;
-    location.href = `mailto:contact@astracorenova.com?subject=${encodeURIComponent('Цифровий працівник для бізнесу')}&body=${encodeURIComponent(text)}`;
-    document.getElementById('form-status').textContent = language === 'uk' ? 'Якщо поштова програма не відкрилася, напишіть на адресу поруч із формою.' : 'If your email app did not open, write to the email address beside the form.';
-  });
-
   const activeScrambles = new Map();
   document.querySelectorAll('[data-scramble]').forEach(node => {
     const original = node.textContent;
@@ -52,8 +44,10 @@
   reduced.addEventListener('change', () => { if (reduced.matches) { activeScrambles.forEach((id,node) => { cancelAnimationFrame(id); node.textContent = node.dataset.original; }); activeScrambles.clear(); } });
 
   // Motion preferences and device limits are checked again inside the scene module.
-  if (!reduced.matches && !(navigator.hardwareConcurrency <= 4) && !navigator.connection?.saveData) {
-    import('./temple-journey.js').catch(()=>document.documentElement.classList.remove('scene-preview'));
+  if (window.ACN_SCENE_ALLOWED) {
+    // Let text and local fonts paint first; the exact temple frame is already visible.
+    Promise.all([document.fonts.ready,new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))])
+      .then(()=>import('./temple-journey.js')).catch(()=>document.documentElement.classList.remove('scene-preview'));
   }
   const rooms=[...document.querySelectorAll('[data-room-link]')];
   if (rooms.length) {

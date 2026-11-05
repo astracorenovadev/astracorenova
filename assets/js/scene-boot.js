@@ -1,10 +1,10 @@
 // Inlined in the head: choose the first-paint treatment before content is drawn.
 (()=>{
- if(matchMedia('(prefers-reduced-motion: reduce)').matches||navigator.hardwareConcurrency<=4||navigator.connection?.saveData||!window.WebGL2RenderingContext)return;
- document.documentElement.classList.add('scene-preview');
  const mobile=matchMedia('(max-width:900px), (pointer:coarse)').matches;
+ const limited=navigator.hardwareConcurrency<=(mobile?2:4)||(navigator.deviceMemory&&navigator.deviceMemory<=2);
+ window.ACN_SCENE_ALLOWED=!limited&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&!navigator.connection?.saveData&&!!window.WebGL2RenderingContext;
+ if(!window.ACN_SCENE_ALLOWED)return;
+ document.documentElement.classList.add('scene-preview');
  function preload(rel,href,as){const link=document.createElement('link');link.rel=rel;link.href=href;if(as)link.as=as;if(as==='fetch'||rel==='modulepreload')link.crossOrigin='anonymous';document.head.append(link);}
  preload('preload',`assets/3d/temple-entry${mobile?'-mobile':''}.webp`,'image');
- preload('preload',`assets/3d/oracle${mobile?'-mobile':''}.glb`,'fetch');
- preload('modulepreload','https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js');
 })();

@@ -1,31 +1,15 @@
-# AstraCoreNova — бізнес-сайт
+# AstraCoreNova
 
-Незалежний сайт цифрових працівників для бізнесу. Домен: **https://astracorenova.com/**. Пошта: **contact@astracorenova.com**.
+Незалежний бізнес-сайт: https://astracorenova.com/. Поточні продажні доробки — у `sales-v2`. Публікація у `main` — після локального перегляду власником.
 
-Статичний HTML, UA/EN, єдина кінематографічна сцена храму, three.js 0.180.0, GSAP 3.13.0, стиснені GLB/WebP. Потужні телефони отримують рух камери з лімітом 30 fps, DPR ≤ 1, однією статуєю одночасно, без тіней і постобробки. Слабкі пристрої, saveData та reduced motion використовують постери. До запуску WebGL показується точний кадр храму; HTML і кнопки доступні одразу. Поява текстових блоків і карток поважає reduced motion.
+Локальний перегляд: `python -m http.server 4180 --bind 127.0.0.1` у корені репозиторію.
 
-## Локальний перегляд
+Публічний сайт містить тільки статичні сторінки та ресурси. Рев’ю, скриншоти, звіти та інструменти збирання збережені локально поза репозиторієм: `C:\ACN-бізнес\acn\docs\site-review\` і `C:\ACN-бізнес\tooling\sales\`. Генератор: `python ..\tooling\sales\build-home.py`.
 
-```powershell
-python -m http.server 4180 --bind 127.0.0.1
-```
+Публічна конфігурація — тільки `assets/js/sales-config.js`: `WEB3FORMS_KEY`, `TELEGRAM_URL`, `CF_BEACON_TOKEN`. Поки значень немає, анкета не імітує успішного надсилання, показує запасний email; Telegram не веде на вигадану адресу, аналітика не завантажується. Текст `privacy.html` — явна заглушка, очікує погодженого тексту Claude.
 
-Відкрити http://127.0.0.1:4180/.
+Web3Forms: після отримання ключа власник має увімкнути обов’язкову hCaptcha у налаштуваннях форми. Серверну перевірку виконує Web3Forms; секрет hCaptcha у сайт не додається. Див. [офіційну інтеграцію](https://docs.web3forms.com/getting-started/customizations/spam-protection/hcaptcha).
 
-```powershell
-python scripts/build-home.py
-python scripts/check-business.py
-node scripts/check-models.mjs
-node scripts/check-architecture-models.mjs
-```
+Cloudflare Web Analytics підключається тільки після заповнення токена. Власних аналітичних cookie сайт не створює. Див. [офіційне підключення](https://developers.cloudflare.com/web-analytics/get-started/).
 
-## Публікація
-
-Власник переглянув локальний сайт та дозволив публікацію 2026-11-05. Налаштування:
-
-1. Перший push у `main`.
-2. Settings → Pages → Deploy from a branch → `main` → `/ (root)`.
-3. Custom domain: `astracorenova.com`; кореневий `CNAME` уже підготовлений.
-4. Перевірити DNS у власника домену та доступність HTTPS; увімкнути Enforce HTTPS після видачі сертифіката.
-
-Наявність локального CNAME сама по собі не активує домен у GitHub Pages. Документація: [publishing source](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site), [custom domain](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site).
+Сцена має окремий мобільний бюджет: DPR ≤ 1, ліміт 30 fps, одна статуя одночасно, без bloom і динамічних тіней. Для сучасних телефонів обмежена кількість логічних ядер у браузері не є автоматичною причиною вимикати WebGL2. Слабкі пристрої, reduced motion та saveData зберігають постери.

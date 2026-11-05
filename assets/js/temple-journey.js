@@ -9,7 +9,7 @@ let updateStatus=()=>{};
 let battery;
 function reason(){
   if(reduced.matches)return 'Постери · зменшення руху';
-  if(navigator.hardwareConcurrency<=4)return 'Постери · ощадний режим';
+  if(navigator.hardwareConcurrency<=(mobile?2:4)||(navigator.deviceMemory&&navigator.deviceMemory<=2))return 'Постери · ощадний режим';
   if(navigator.connection?.saveData)return 'Постери · економія трафіку';
   if(battery&&!battery.charging&&battery.level<.2)return 'Постери · низький заряд';
   return '';
@@ -30,9 +30,9 @@ async function start(){
  if(!gl){document.documentElement.classList.remove('scene-preview');status.textContent='Постери · WebGL2 недоступний';return;}gl.getExtension('WEBGL_lose_context')?.loseContext();
  try{
  const [THREE,{GLTFLoader},{MeshoptDecoder},{RoomEnvironment},{EffectComposer},{RenderPass},{UnrealBloomPass},{BokehPass},{OutputPass},g,s,{mergeGeometries},atmosphere]=await Promise.all([
-  import('three'),import('three/addons/loaders/GLTFLoader.js'),import('three/addons/libs/meshopt_decoder.module.js'),import('three/addons/environments/RoomEnvironment.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/EffectComposer.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/RenderPass.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/UnrealBloomPass.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/BokehPass.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/OutputPass.js'),import('https://cdn.jsdelivr.net/npm/gsap@3.13.0/index.js'),import('https://cdn.jsdelivr.net/npm/gsap@3.13.0/ScrollTrigger.js'),import('three/addons/utils/BufferGeometryUtils.js'),import('./temple-atmosphere.js')]);
+  import('three'),import('three/addons/loaders/GLTFLoader.js'),import('three/addons/libs/meshopt_decoder.module.js'),import('three/addons/environments/RoomEnvironment.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/EffectComposer.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/RenderPass.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/UnrealBloomPass.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/BokehPass.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/OutputPass.js'),mobile?Promise.resolve({}):import('https://cdn.jsdelivr.net/npm/gsap@3.13.0/index.js'),mobile?Promise.resolve({}):import('https://cdn.jsdelivr.net/npm/gsap@3.13.0/ScrollTrigger.js'),import('three/addons/utils/BufferGeometryUtils.js'),import('./temple-atmosphere.js')]);
  if(reason()){status.textContent=reason();return;}
- const {gsap}=g,{ScrollTrigger}=s;gsap.registerPlugin(ScrollTrigger);
+ const {gsap}=g,{ScrollTrigger}=s;if(!mobile)gsap.registerPlugin(ScrollTrigger);
  const renderer=new THREE.WebGLRenderer({alpha:false,antialias:true,powerPreference:'high-performance'});
  renderer.setPixelRatio(Math.min(devicePixelRatio,mobile?1:1.5));renderer.setSize(innerWidth,innerHeight);renderer.setClearColor(0x000000);
  renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.02;
@@ -40,7 +40,7 @@ async function start(){
  root.append(renderer.domElement);
  const scene=new THREE.Scene();scene.background=new THREE.Color(0x000000);scene.fog=new THREE.FogExp2(0x000000,.033);
  const camera=new THREE.PerspectiveCamera(49,innerWidth/innerHeight,.1,120);
- const room=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(renderer),environment=pmrem.fromScene(room,.04);scene.environment=environment.texture;scene.environmentIntensity=.25;room.dispose();pmrem.dispose();
+ const room=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(renderer),environment=pmrem.fromScene(room,.04,.1,100,{size:mobile?64:256});scene.environment=environment.texture;scene.environmentIntensity=.25;room.dispose();pmrem.dispose();
  const gold=new THREE.MeshStandardMaterial({color:0xc9a044,metalness:.68,roughness:.52,envMapIntensity:.45});
  const darkGold=new THREE.MeshStandardMaterial({color:0x8a6a2a,metalness:.45,roughness:.7,envMapIntensity:.25});
  const marble=new THREE.MeshStandardMaterial({color:0x171614,metalness:0,roughness:.88,envMapIntensity:.12});
@@ -58,7 +58,7 @@ async function start(){
  const floorMaterial=marble.clone();floorMaterial.onBeforeCompile=shader=>{marble.onBeforeCompile(shader);shader.fragmentShader=shader.fragmentShader.replace('#include <dithering_fragment>',`vec2 tile=abs(fract(acnPosition.xy/3.2)-.5);float seam=max(smoothstep(.493,.5,tile.x),smoothstep(.493,.5,tile.y));gl_FragColor.rgb*=1.-seam*.25;\n#include <dithering_fragment>`);};floorMaterial.color.multiplyScalar(.5);floorMaterial.roughness=.94;floorMaterial.envMapIntensity=.08;
  const floor=mesh(new THREE.PlaneGeometry(24,140),floorMaterial,0,-.03,-54);floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;
  function flutedShaft(){
-  const geometry=new THREE.CylinderGeometry(.43,.55,6.2,100,12),positions=geometry.getAttribute('position');
+  const geometry=new THREE.CylinderGeometry(.43,.55,6.2,mobile?40:100,mobile?1:12),positions=geometry.getAttribute('position');
   for(let i=0;i<positions.count;i++){const x=positions.getX(i),z=positions.getZ(i),radius=Math.hypot(x,z);if(radius<.01)continue;const angle=Math.atan2(z,x),groove=.5+.5*Math.cos(angle*20),factor=1-.065*groove;positions.setX(i,x*factor);positions.setZ(i,z*factor);}
   geometry.computeVertexNormals();return geometry;
  }
@@ -77,9 +77,10 @@ async function start(){
   }
   mesh(new THREE.BoxGeometry(14,.45,1.4),marble,0,7.5,z);
   mesh(new THREE.BoxGeometry(13,.025,1.42),darkGold,0,7.25,z);
+  if(mobile)await new Promise(resolve=>setTimeout(resolve,0));
  }
  const {createCodePortals}=await import('./code-portals.js');const codePortals=createCodePortals(scene,[-40,-46,-52,-58]);
- for(const z of [2,-27,-74]){
+ for(const z of [2,-27,-74,-100]){
   mesh(new THREE.CylinderGeometry(1.42,1.6,.6,64),marble,2.5,.3,z);
   const ring=mesh(new THREE.TorusGeometry(1.43,.025,8,80),gold,2.5,.61,z);ring.rotation.x=Math.PI/2;
  }
@@ -92,7 +93,7 @@ async function start(){
  const columnShadows=atmosphere.createColumnShadows(scene,columnFeet);
  function label(text,x,y,z){const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=128;const ctx=canvas.getContext('2d');ctx.font='32px Cinzel,Georgia';ctx.textAlign='center';ctx.fillStyle='#d4a84b';ctx.fillText(text,512,72);const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;const material=new THREE.SpriteMaterial({map:texture,color:0xffffff,transparent:true,opacity:.8,depthWrite:false});const sprite=new THREE.Sprite(material);sprite.position.set(x,y,z);sprite.scale.set(8,1,1);scene.add(sprite);return sprite;}
  await document.fonts.ready;
- const signs=[label('EX ASTRIS NOVA AETAS',0,6.3,0),label('OPERA DIGITALIA',0,6.3,-28),label('INTELLIGENTIA SINE LIMITIBUS',-5.9,4.5,-5),label('HOMO DECERNIT',0,6.3,-75),label('PRETIUM ET VALOR',0,6.3,-100),...[-40,-46,-52,-58].map((z,i)=>label(['I · COGNITIO','II · EXPERIMENTUM','III · OPUS','IV · CURA'][i],0,6.6,z))];
+ const signs=[label('OPERA DIGITALIA',0,6.3,-28),label('INTELLIGENTIA SINE LIMITIBUS',-5.9,4.5,-5),label('HOMO DECERNIT',0,6.3,-75),label('PRETIUM ET VALOR',0,6.3,-100),...[-40,-46,-52,-58].map((z,i)=>label(['I · COGNITIO','II · EXPERIMENTUM','III · OPUS','IV · CURA'][i],0,6.6,z))];
  const goldenCode=atmosphere.createGoldenCode(scene,{count:mobile?180:520,depth:122,dustCount:mobile?150:580,statues:[[2.5,2],[2.5,-27],[2.5,-74]]});
  // Merge the static columns/trim by material: richer architecture without hundreds of draw calls.
  for(const source of [scene,proceduralColumns])for(const material of [marble,gold,darkGold]){
@@ -100,7 +101,7 @@ async function start(){
   const geometries=objects.map(object=>{object.updateMatrix();return object.geometry.clone().applyMatrix4(object.matrix);});
   if(geometries.length){const merged=mergeGeometries(geometries);if(merged){objects.forEach(object=>{source.remove(object);object.geometry.dispose();});const batch=new THREE.Mesh(merged,material);batch.castShadow=true;batch.receiveShadow=true;source.add(batch);}geometries.forEach(geometry=>geometry.dispose());}
  }
- const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);const statues=[];let colossusPromise,madonnaPromise;const columnBatches=[];
+ const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);const statues=[];const pendingModels=new Set(),retryAfter=new Map();let finalMadonna;const columnBatches=[];
  let stopped=false,raf=0,last=0,time=0,mobileRequested='oracle';const state={progress:0,scrollY:0,loaded:0,frames:0,architecture:false,floorInserts:false};
  async function loadColumn(){
   try{
@@ -149,15 +150,20 @@ async function start(){
    const bounds=new THREE.Box3().setFromObject(object),size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3()),scale=4.3/Math.max(size.x,size.y,size.z);
    object.scale.setScalar(scale);object.position.set(-center.x*scale,.66-bounds.min.y*scale,-center.z*scale);
    object.traverse(n=>{if(n.isMesh){n.castShadow=!mobile;n.receiveShadow=!mobile;}});
-   statue.add(object);statue.userData.modelName=name;statue.position.set(2.5,0,z);scene.add(statue);statues.push(statue);state.loaded++;return statue;
+   statue.add(object);statue.userData.modelName=name;statue.position.set(2.5,0,z);scene.add(statue);statues.push(statue);state.loaded++;
+   if(!mobile&&name==='madonna'){finalMadonna=statue.clone(true);finalMadonna.userData.modelName='madonna-final';finalMadonna.position.z=-100;scene.add(finalMadonna);statues.push(finalMadonna);}
+   return statue;
   }catch(error){console.warn('ACN model fallback',name,error.message);}
  }
+ function ensureModel(name,z){
+  if(statues.some(statue=>statue.userData.modelName===name)||pendingModels.has(name)||performance.now()<(retryAfter.get(name)||0))return;
+  pendingModels.add(name);load(name,z).then(model=>{if(!model)retryAfter.set(name,performance.now()+3000);}).finally(()=>pendingModels.delete(name));
+ }
  function selectMobileModel(p){
-  const desired=p<.14?'oracle':p<.37?'colossus':p>.64&&p<.94?'madonna':null;
-  if(desired===mobileRequested)return;
+  const desired=p<.14?'oracle':p<.37?'colossus':p>.64?'madonna':null;
   mobileRequested=desired;
-  if(desired)load(desired,{oracle:2,colossus:-27,madonna:-74}[desired]);
-  else statues.splice(0).forEach(statue=>{scene.remove(statue);disposeObject(statue);});
+  if(desired){ensureModel(desired,{oracle:2,colossus:-27,madonna:-74}[desired]);if(desired==='madonna')statues.forEach(statue=>{if(statue.userData.modelName==='madonna')statue.position.z=p>.88?-100:-74;});}
+  else if(statues.length)statues.splice(0).forEach(statue=>{scene.remove(statue);disposeObject(statue);});
  }
  const route=new THREE.CatmullRomCurve3([new THREE.Vector3(0,2.65,11),new THREE.Vector3(.15,2.65,-19),new THREE.Vector3(-.4,2.8,-33),new THREE.Vector3(.3,2.65,-59),new THREE.Vector3(0,2.7,-66),new THREE.Vector3(0,2.65,-90)]);
  const lookRoute=new THREE.CatmullRomCurve3([new THREE.Vector3(2,2.8,0),new THREE.Vector3(2.5,2.8,-27),new THREE.Vector3(0,3,-43),new THREE.Vector3(0,3,-66),new THREE.Vector3(2.5,2.8,-74),new THREE.Vector3(2.5,3,-100)]);
@@ -173,15 +179,23 @@ async function start(){
  let pointerX=0,pointerY=0;
  const onPointer=event=>{pointerX=(event.clientX/innerWidth-.5)*.24;pointerY=(event.clientY/innerHeight-.5)*.10;};addEventListener('pointermove',onPointer,{passive:true});
  const entranceCopy=document.querySelector('.hero-copy');
- const trigger=ScrollTrigger.create({trigger:'#main',start:'top top',end:()=>anchors[5],scrub:1.05,invalidateOnRefresh:true,onRefresh:measure,animation:gsap.to(state,{scrollY:()=>anchors[5],ease:'none',paused:true})});
+ const trigger=mobile?{kill:()=>{}}:ScrollTrigger.create({trigger:'#main',start:'top top',end:()=>anchors[5],scrub:1.05,invalidateOnRefresh:true,onRefresh:measure,animation:gsap.to(state,{scrollY:()=>anchors[5],ease:'none',paused:true})});
  const statusForProgress=()=>{};updateStatus=statusForProgress;
+ const onRoomClick=event=>{
+  const href=event.target.closest('a[href^="#"]')?.getAttribute('href');
+  const name=href==='#services'?'colossus':['#security','#pricing','#contact','#faq','#savings'].includes(href)?'madonna':href==='#hero'?'oracle':null;
+  if(name&&!mobile)ensureModel(name,{oracle:2,colossus:-27,madonna:-74}[name]);
+ };
+ document.addEventListener('click',onRoomClick);
+
  function render(now){
   if(stopped||document.hidden){raf=0;return;}
   if(now-last>=1000/(mobile?30:60)){
    const delta=Math.min((now-last)/1000,.08);last=now;time+=delta;state.frames++;
+   if(mobile)state.scrollY=THREE.MathUtils.damp(state.scrollY,window.scrollY,6,delta);
    const p=routeProgress(state.scrollY),point=route.getPoint(p),target=lookRoute.getPoint(p);state.progress=p;
    if(mobile)selectMobileModel(p);
-   if(!mobile&&p>.06&&!colossusPromise)colossusPromise=load('colossus',-27);if(!mobile&&p>.49&&!madonnaPromise)madonnaPromise=load('madonna',-74);
+   if(!mobile){if(p<.14)ensureModel('oracle',2);if(p>.06&&p<.5)ensureModel('colossus',-27);if(p>.49)ensureModel('madonna',-74);}
    point.x+=pointerX+Math.sin(time*.13)*.12;point.y+=pointerY+Math.sin(time*.11)*.025;
    target.x-=mobile?0:1.05;camera.position.copy(point);camera.lookAt(target);
    const transition=Math.sin(Math.PI*p);
@@ -202,12 +216,13 @@ async function start(){
  }
  function resume(){if(!stopped&&!document.hidden&&!raf){last=performance.now();raf=requestAnimationFrame(render);}statusForProgress();}
  document.addEventListener('visibilitychange',resume);
- function resize(){if(stopped)return;measure();camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight);ScrollTrigger.refresh();}addEventListener('resize',resize);
+ function resize(){if(stopped)return;measure();camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight);if(!mobile)ScrollTrigger.refresh();}addEventListener('resize',resize);
  function disposeObject(object){object.traverse(node=>{if(node.geometry)node.geometry.dispose();const materials=Array.isArray(node.material)?node.material:[node.material];materials.filter(Boolean).forEach(material=>{Object.values(material).forEach(value=>{if(value?.isTexture)value.dispose();});material.dispose();});});}
- dispose=()=>{if(stopped)return;stopped=true;cancelAnimationFrame(raf);trigger.kill();document.removeEventListener('visibilitychange',resume);removeEventListener('pointermove',onPointer);removeEventListener('resize',resize);disposeObject(scene);environment.dispose();composer.dispose();renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();document.body.classList.remove('scene-ready');document.documentElement.classList.remove('scene-preview');entranceCopy.style.opacity='1';};
+ dispose=()=>{if(stopped)return;stopped=true;cancelAnimationFrame(raf);trigger.kill();document.removeEventListener('visibilitychange',resume);document.removeEventListener('click',onRoomClick);removeEventListener('pointermove',onPointer);removeEventListener('resize',resize);disposeObject(scene);environment.dispose();composer.dispose();renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();document.body.classList.remove('scene-ready');document.documentElement.classList.remove('scene-preview');entranceCopy.style.opacity='1';};
  await Promise.all([load('oracle',2),mobile?Promise.resolve():loadColumn()]);if(reason()){dispose();status.textContent=reason();return;}
  if(!mobile)loadFloorInserts();
  camera.position.copy(route.getPoint(0));const firstTarget=lookRoute.getPoint(0);firstTarget.x-=mobile?0:1.05;camera.lookAt(firstTarget);
+ state.scrollY=window.scrollY;const initialProgress=routeProgress(state.scrollY);camera.position.copy(route.getPoint(initialProgress));const initialTarget=lookRoute.getPoint(initialProgress);initialTarget.x-=mobile?0:1.05;camera.lookAt(initialTarget);
  await renderer.compileAsync(scene,camera);composer.render();
  document.body.classList.add('scene-ready');root.dataset.state='ready';resume();addEventListener('pagehide',dispose,{once:true});
  }catch(error){dispose();document.documentElement.classList.remove('scene-preview');root.dataset.state='fallback';status.textContent='Постери · 3D тимчасово недоступне';console.warn('ACN journey fallback',error.message);}
