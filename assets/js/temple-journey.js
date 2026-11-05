@@ -30,7 +30,7 @@ async function start(){
  if(!gl){document.documentElement.classList.remove('scene-preview');status.textContent='Постери · WebGL2 недоступний';return;}gl.getExtension('WEBGL_lose_context')?.loseContext();
  try{
  const [THREE,{GLTFLoader},{MeshoptDecoder},{RoomEnvironment},{EffectComposer},{RenderPass},{UnrealBloomPass},{BokehPass},{OutputPass},g,s,{mergeGeometries},atmosphere]=await Promise.all([
-  import('three'),import('three/addons/loaders/GLTFLoader.js'),import('three/addons/libs/meshopt_decoder.module.js'),import('three/addons/environments/RoomEnvironment.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/EffectComposer.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/RenderPass.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/UnrealBloomPass.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/BokehPass.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/OutputPass.js'),mobile?Promise.resolve({}):import('https://cdn.jsdelivr.net/npm/gsap@3.13.0/index.js'),mobile?Promise.resolve({}):import('https://cdn.jsdelivr.net/npm/gsap@3.13.0/ScrollTrigger.js'),import('three/addons/utils/BufferGeometryUtils.js'),import('./temple-atmosphere.js')]);
+  import('three'),import('three/addons/loaders/GLTFLoader.js'),import('three/addons/libs/meshopt_decoder.module.js'),import('three/addons/environments/RoomEnvironment.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/EffectComposer.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/RenderPass.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/UnrealBloomPass.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/BokehPass.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/OutputPass.js'),mobile?Promise.resolve({}):import('https://cdn.jsdelivr.net/npm/gsap@3.13.0/index.js'),mobile?Promise.resolve({}):import('https://cdn.jsdelivr.net/npm/gsap@3.13.0/ScrollTrigger.js'),import('three/addons/utils/BufferGeometryUtils.js'),import(`./temple-atmosphere.js?v=${encodeURIComponent(window.ACN_ASSET_VERSION||'current')}`)]);
  if(reason()){status.textContent=reason();return;}
  const {gsap}=g,{ScrollTrigger}=s;if(!mobile)gsap.registerPlugin(ScrollTrigger);
  const renderer=new THREE.WebGLRenderer({alpha:false,antialias:true,powerPreference:'high-performance'});
@@ -79,7 +79,7 @@ async function start(){
   mesh(new THREE.BoxGeometry(13,.025,1.42),darkGold,0,7.25,z);
   if(mobile)await new Promise(resolve=>setTimeout(resolve,0));
  }
- const {createCodePortals}=await import('./code-portals.js');const codePortals=createCodePortals(scene,[-40,-46,-52,-58]);
+ const {createCodePortals}=await import(`./code-portals.js?v=${encodeURIComponent(window.ACN_ASSET_VERSION||'current')}`);const codePortals=createCodePortals(scene,[-40,-46,-52,-58]);
  for(const z of [2,-27,-74,-100]){
   mesh(new THREE.CylinderGeometry(1.42,1.6,.6,64),marble,2.5,.3,z);
   const ring=mesh(new THREE.TorusGeometry(1.43,.025,8,80),gold,2.5,.61,z);ring.rotation.x=Math.PI/2;

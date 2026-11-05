@@ -47,7 +47,8 @@
   if (window.ACN_SCENE_ALLOWED) {
     // Let text and local fonts paint first; the exact temple frame is already visible.
     Promise.all([document.fonts.ready,new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))])
-      .then(()=>import('./temple-journey.js')).catch(()=>document.documentElement.classList.remove('scene-preview'));
+      .then(()=>import(`./temple-journey.js?v=${encodeURIComponent(window.ACN_ASSET_VERSION||'current')}`))
+      .catch(error=>{document.documentElement.classList.remove('scene-preview');console.warn('ACN scene entry failed',error);});
   }
   const rooms=[...document.querySelectorAll('[data-room-link]')];
   if (rooms.length) {
