@@ -1,7 +1,10 @@
 """Compose the approved continuous temple around the existing static business content."""
 import re
+from pathlib import Path
 
 def compose(html):
+    boot=(Path(__file__).resolve().parents[1]/'assets/js/scene-boot.js').read_text(encoding='utf-8')
+    html=html.replace('<head>','<head><script>'+boot+'</script>',1)
     html=html.replace('<script src="assets/js/site.js" defer></script>','<script src="assets/js/site.js" defer></script><script src="assets/js/reveal.js" defer></script>')
     html=html.replace('<body>','<body class="temple-site">',1)
     html=html.replace('<link rel="stylesheet" href="assets/css/temple.css">','<link rel="stylesheet" href="assets/css/temple.css"><link rel="stylesheet" href="assets/css/journey-site.css">')

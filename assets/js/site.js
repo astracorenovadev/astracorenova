@@ -52,10 +52,8 @@
   reduced.addEventListener('change', () => { if (reduced.matches) { activeScrambles.forEach((id,node) => { cancelAnimationFrame(id); node.textContent = node.dataset.original; }); activeScrambles.clear(); } });
 
   // Motion preferences and device limits are checked again inside the scene module.
-  // Mobile users never download three.js or 3D models.
-  if (!reduced.matches && innerWidth > 900 && !matchMedia('(pointer: coarse)').matches && navigator.hardwareConcurrency > 4 && !navigator.connection?.saveData) {
-    const start=()=>import('./temple-journey.js').catch(()=>{});
-    if('requestIdleCallback' in window) requestIdleCallback(start,{timeout:2200}); else setTimeout(start,1200);
+  if (!reduced.matches && !(navigator.hardwareConcurrency <= 4) && !navigator.connection?.saveData) {
+    import('./temple-journey.js').catch(()=>document.documentElement.classList.remove('scene-preview'));
   }
   const rooms=[...document.querySelectorAll('[data-room-link]')];
   if (rooms.length) {

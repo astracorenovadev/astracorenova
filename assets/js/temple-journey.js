@@ -1,14 +1,14 @@
-/* Two-hall review prototype. One persistent WebGL canvas; all business content is HTML. */
+/* One persistent temple. Desktop cinema and a lower-cost mobile camera journey. */
 const root=document.getElementById('temple-scene');
 const status=document.createElement('span');
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 const narrow=matchMedia('(max-width: 900px)');
+const mobile=narrow.matches||matchMedia('(pointer: coarse)').matches;
 let dispose=()=>{};
 let updateStatus=()=>{};
 let battery;
 function reason(){
   if(reduced.matches)return 'Постери · зменшення руху';
-  if(narrow.matches||matchMedia('(pointer: coarse)').matches)return 'Постери · мобільний режим';
   if(navigator.hardwareConcurrency<=4)return 'Постери · ощадний режим';
   if(navigator.connection?.saveData)return 'Постери · економія трафіку';
   if(battery&&!battery.charging&&battery.level<.2)return 'Постери · низький заряд';
@@ -19,24 +19,24 @@ document.querySelectorAll('a[href^="#"]').forEach(link=>link.addEventListener('c
   event.preventDefault();target.scrollIntoView({behavior:reduced.matches?'instant':'smooth'});
   history.replaceState(null,'',`#${id}`);
 }));
-function change(){const fallback=reason();if(fallback){dispose();status.textContent=fallback;}}
+function change(){const fallback=reason();if(fallback){dispose();document.documentElement.classList.remove('scene-preview');status.textContent=fallback;}}
 reduced.addEventListener('change',change);narrow.addEventListener('change',change);
 document.addEventListener('visibilitychange',()=>updateStatus());
 
 async function start(){
  try{battery=await navigator.getBattery?.();battery?.addEventListener('levelchange',change);battery?.addEventListener('chargingchange',change);}catch{}
- if(reason()){status.textContent=reason();return;}
+ if(reason()){document.documentElement.classList.remove('scene-preview');status.textContent=reason();return;}
  const probe=document.createElement('canvas'),gl=probe.getContext('webgl2');
- if(!gl){status.textContent='Постери · WebGL2 недоступний';return;}gl.getExtension('WEBGL_lose_context')?.loseContext();
+ if(!gl){document.documentElement.classList.remove('scene-preview');status.textContent='Постери · WebGL2 недоступний';return;}gl.getExtension('WEBGL_lose_context')?.loseContext();
  try{
  const [THREE,{GLTFLoader},{MeshoptDecoder},{RoomEnvironment},{EffectComposer},{RenderPass},{UnrealBloomPass},{BokehPass},{OutputPass},g,s,{mergeGeometries},atmosphere]=await Promise.all([
-  import('three'),import('three/addons/loaders/GLTFLoader.js'),import('three/addons/libs/meshopt_decoder.module.js'),import('three/addons/environments/RoomEnvironment.js'),import('three/addons/postprocessing/EffectComposer.js'),import('three/addons/postprocessing/RenderPass.js'),import('three/addons/postprocessing/UnrealBloomPass.js'),import('three/addons/postprocessing/BokehPass.js'),import('three/addons/postprocessing/OutputPass.js'),import('https://cdn.jsdelivr.net/npm/gsap@3.13.0/index.js'),import('https://cdn.jsdelivr.net/npm/gsap@3.13.0/ScrollTrigger.js'),import('three/addons/utils/BufferGeometryUtils.js'),import('./temple-atmosphere.js')]);
+  import('three'),import('three/addons/loaders/GLTFLoader.js'),import('three/addons/libs/meshopt_decoder.module.js'),import('three/addons/environments/RoomEnvironment.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/EffectComposer.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/RenderPass.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/UnrealBloomPass.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/BokehPass.js'),mobile?Promise.resolve({}):import('three/addons/postprocessing/OutputPass.js'),import('https://cdn.jsdelivr.net/npm/gsap@3.13.0/index.js'),import('https://cdn.jsdelivr.net/npm/gsap@3.13.0/ScrollTrigger.js'),import('three/addons/utils/BufferGeometryUtils.js'),import('./temple-atmosphere.js')]);
  if(reason()){status.textContent=reason();return;}
  const {gsap}=g,{ScrollTrigger}=s;gsap.registerPlugin(ScrollTrigger);
  const renderer=new THREE.WebGLRenderer({alpha:false,antialias:true,powerPreference:'high-performance'});
- renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);renderer.setClearColor(0x000000);
+ renderer.setPixelRatio(Math.min(devicePixelRatio,mobile?1:1.5));renderer.setSize(innerWidth,innerHeight);renderer.setClearColor(0x000000);
  renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.02;
- renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+ renderer.shadowMap.enabled=!mobile;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
  root.append(renderer.domElement);
  const scene=new THREE.Scene();scene.background=new THREE.Color(0x000000);scene.fog=new THREE.FogExp2(0x000000,.033);
  const camera=new THREE.PerspectiveCamera(49,innerWidth/innerHeight,.1,120);
@@ -93,7 +93,7 @@ async function start(){
  function label(text,x,y,z){const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=128;const ctx=canvas.getContext('2d');ctx.font='32px Cinzel,Georgia';ctx.textAlign='center';ctx.fillStyle='#d4a84b';ctx.fillText(text,512,72);const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;const material=new THREE.SpriteMaterial({map:texture,color:0xffffff,transparent:true,opacity:.8,depthWrite:false});const sprite=new THREE.Sprite(material);sprite.position.set(x,y,z);sprite.scale.set(8,1,1);scene.add(sprite);return sprite;}
  await document.fonts.ready;
  const signs=[label('EX ASTRIS NOVA AETAS',0,6.3,0),label('OPERA DIGITALIA',0,6.3,-28),label('INTELLIGENTIA SINE LIMITIBUS',-5.9,4.5,-5),label('HOMO DECERNIT',0,6.3,-75),label('PRETIUM ET VALOR',0,6.3,-100),...[-40,-46,-52,-58].map((z,i)=>label(['I · COGNITIO','II · EXPERIMENTUM','III · OPUS','IV · CURA'][i],0,6.6,z))];
- const goldenCode=atmosphere.createGoldenCode(scene,{count:520,depth:122,dustCount:580,statues:[[2.5,2],[2.5,-27],[2.5,-74]]});
+ const goldenCode=atmosphere.createGoldenCode(scene,{count:mobile?180:520,depth:122,dustCount:mobile?150:580,statues:[[2.5,2],[2.5,-27],[2.5,-74]]});
  // Merge the static columns/trim by material: richer architecture without hundreds of draw calls.
  for(const source of [scene,proceduralColumns])for(const material of [marble,gold,darkGold]){
   const objects=source.children.filter(object=>object.isMesh&&object.material===material&&object!==floor&&object.geometry.type!=='PlaneGeometry');
@@ -101,10 +101,10 @@ async function start(){
   if(geometries.length){const merged=mergeGeometries(geometries);if(merged){objects.forEach(object=>{source.remove(object);object.geometry.dispose();});const batch=new THREE.Mesh(merged,material);batch.castShadow=true;batch.receiveShadow=true;source.add(batch);}geometries.forEach(geometry=>geometry.dispose());}
  }
  const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);const statues=[];let colossusPromise,madonnaPromise;const columnBatches=[];
- let stopped=false,raf=0,last=0,time=0;const state={progress:0,scrollY:0,loaded:0,frames:0,architecture:false,floorInserts:false};
+ let stopped=false,raf=0,last=0,time=0,mobileRequested='oracle';const state={progress:0,scrollY:0,loaded:0,frames:0,architecture:false,floorInserts:false};
  async function loadColumn(){
   try{
-   const url='assets/3d/column.glb',response=await fetch(url,{method:'HEAD'});if(!response.ok)return;
+   const url='assets/3d/column.glb';
    const gltf=await loader.loadAsync(url);if(stopped){disposeObject(gltf.scene);return;}
    const original=gltf.scene;original.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(original),size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3()),scale=7.3/size.y;
    const normalize=new THREE.Matrix4().makeScale(scale,scale,scale).multiply(new THREE.Matrix4().makeTranslation(-center.x,-bounds.min.y,-center.z));
@@ -140,7 +140,25 @@ async function start(){
    if(inserts.children.length){scene.add(inserts);state.floorInserts=true;}
   }catch(error){console.warn('ACN: keeping plain stone floor',error.message);}
  }
- async function load(name,z){try{const response=await fetch(`assets/3d/${name}.glb`,{method:'HEAD'});if(!response.ok)return;const gltf=await loader.loadAsync(`assets/3d/${name}.glb`);if(stopped){disposeObject(gltf.scene);return;}const statue=new THREE.Group(),object=gltf.scene;const bounds=new THREE.Box3().setFromObject(object),size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3()),scale=4.3/Math.max(size.x,size.y,size.z);object.scale.setScalar(scale);object.position.set(-center.x*scale,.66-bounds.min.y*scale,-center.z*scale);object.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}});statue.add(object);statue.position.set(2.5,0,z);scene.add(statue);statues.push(statue);state.loaded++;return statue;}catch(error){console.warn('ACN prototype model fallback',name,error.message);}}
+ async function load(name,z){
+  try{
+   const gltf=await loader.loadAsync(`assets/3d/${name}${mobile?'-mobile':''}.glb`);
+   if(stopped||(mobile&&mobileRequested!==name)){disposeObject(gltf.scene);return;}
+   if(mobile){statues.splice(0).forEach(statue=>{scene.remove(statue);disposeObject(statue);});}
+   const statue=new THREE.Group(),object=gltf.scene;
+   const bounds=new THREE.Box3().setFromObject(object),size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3()),scale=4.3/Math.max(size.x,size.y,size.z);
+   object.scale.setScalar(scale);object.position.set(-center.x*scale,.66-bounds.min.y*scale,-center.z*scale);
+   object.traverse(n=>{if(n.isMesh){n.castShadow=!mobile;n.receiveShadow=!mobile;}});
+   statue.add(object);statue.userData.modelName=name;statue.position.set(2.5,0,z);scene.add(statue);statues.push(statue);state.loaded++;return statue;
+  }catch(error){console.warn('ACN model fallback',name,error.message);}
+ }
+ function selectMobileModel(p){
+  const desired=p<.14?'oracle':p<.37?'colossus':p>.64&&p<.94?'madonna':null;
+  if(desired===mobileRequested)return;
+  mobileRequested=desired;
+  if(desired)load(desired,{oracle:2,colossus:-27,madonna:-74}[desired]);
+  else statues.splice(0).forEach(statue=>{scene.remove(statue);disposeObject(statue);});
+ }
  const route=new THREE.CatmullRomCurve3([new THREE.Vector3(0,2.65,11),new THREE.Vector3(.15,2.65,-19),new THREE.Vector3(-.4,2.8,-33),new THREE.Vector3(.3,2.65,-59),new THREE.Vector3(0,2.7,-66),new THREE.Vector3(0,2.65,-90)]);
  const lookRoute=new THREE.CatmullRomCurve3([new THREE.Vector3(2,2.8,0),new THREE.Vector3(2.5,2.8,-27),new THREE.Vector3(0,3,-43),new THREE.Vector3(0,3,-66),new THREE.Vector3(2.5,2.8,-74),new THREE.Vector3(2.5,3,-100)]);
  const sections=Object.fromEntries(['hero','services','process','security','pricing'].map(id=>[id,document.getElementById(id)]));
@@ -148,7 +166,9 @@ async function start(){
  function measure(){anchors=[0,Math.max(1,sections.services.offsetTop-innerHeight*.18),sections.process.offsetTop-innerHeight*.32,sections.process.offsetTop+sections.process.offsetHeight-innerHeight*.8,sections.security.offsetTop-innerHeight*.18,sections.pricing.offsetTop-innerHeight*.18];}
  function routeProgress(scroll){for(let i=0;i<anchors.length-1;i++){if(scroll<=anchors[i+1])return (i+THREE.MathUtils.clamp((scroll-anchors[i])/(anchors[i+1]-anchors[i]),0,1))/(anchors.length-1);}return 1;}
  measure();
- const composer=new EffectComposer(renderer,new THREE.WebGLRenderTarget(innerWidth,innerHeight,{type:THREE.UnsignedByteType}));composer.addPass(new RenderPass(scene,camera));const bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.17,.4,.86);composer.addPass(bloom);const bokeh=new BokehPass(scene,camera,{focus:10,aperture:.000012,maxblur:.003});bokeh.enabled=false;composer.addPass(bokeh);composer.addPass(new OutputPass());
+ const composer=mobile?{render:()=>renderer.render(scene,camera),setSize:()=>{},dispose:()=>{}}:new EffectComposer(renderer,new THREE.WebGLRenderTarget(innerWidth,innerHeight,{type:THREE.UnsignedByteType}));
+ const bokeh=mobile?{enabled:false,uniforms:{aperture:{value:0},focus:{value:10}}}:new BokehPass(scene,camera,{focus:10,aperture:.000012,maxblur:.003});
+ if(!mobile){composer.addPass(new RenderPass(scene,camera));composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.17,.4,.86));composer.addPass(bokeh);composer.addPass(new OutputPass());}bokeh.enabled=false;
  if(new URLSearchParams(location.search).has('debug'))window.__acnScene={renderer,scene,camera,composer};
  let pointerX=0,pointerY=0;
  const onPointer=event=>{pointerX=(event.clientX/innerWidth-.5)*.24;pointerY=(event.clientY/innerHeight-.5)*.10;};addEventListener('pointermove',onPointer,{passive:true});
@@ -157,14 +177,15 @@ async function start(){
  const statusForProgress=()=>{};updateStatus=statusForProgress;
  function render(now){
   if(stopped||document.hidden){raf=0;return;}
-  if(now-last>=1000/60){
+  if(now-last>=1000/(mobile?30:60)){
    const delta=Math.min((now-last)/1000,.08);last=now;time+=delta;state.frames++;
    const p=routeProgress(state.scrollY),point=route.getPoint(p),target=lookRoute.getPoint(p);state.progress=p;
-   if(p>.06&&!colossusPromise)colossusPromise=load('colossus',-27);if(p>.49&&!madonnaPromise)madonnaPromise=load('madonna',-74);
+   if(mobile)selectMobileModel(p);
+   if(!mobile&&p>.06&&!colossusPromise)colossusPromise=load('colossus',-27);if(!mobile&&p>.49&&!madonnaPromise)madonnaPromise=load('madonna',-74);
    point.x+=pointerX+Math.sin(time*.13)*.12;point.y+=pointerY+Math.sin(time*.11)*.025;
-   target.x-=1.05;camera.position.copy(point);camera.lookAt(target);
+   target.x-=mobile?0:1.05;camera.position.copy(point);camera.lookAt(target);
    const transition=Math.sin(Math.PI*p);
-   bokeh.enabled=p>.28&&p<.79;bokeh.uniforms.aperture.value=.000012*transition;bokeh.uniforms.focus.value=camera.position.distanceTo(target);
+   bokeh.enabled=!mobile&&p>.28&&p<.79;bokeh.uniforms.aperture.value=.000012*transition;bokeh.uniforms.focus.value=camera.position.distanceTo(target);
    key.position.set(-2+Math.sin(time*.16)*1.2,8,point.z-3);key.target.position.set(2.5,2.5,target.z);
    key.color.setRGB(1,.82-.10*p,.56+.12*p);key.intensity=3.1+Math.sin(time*.24)*.18;
    scene.fog.density=.026+transition*.01;
@@ -175,7 +196,7 @@ async function start(){
    signs.forEach((sign,i)=>sign.material.opacity=.73+Math.sin(time*.7+i)*.12);
    entranceCopy.style.opacity='1';
    composer.render();if(state.frames%30===0)statusForProgress();
-   window.__acnJourney={canvasCount:root.querySelectorAll('canvas').length,progress:p,room:p<.14?'entrance':p<.35?'services':p<.7?'process':p<.9?'security':'final',models:state.loaded,camera:point.toArray(),frames:state.frames,glyphs:goldenCode.count,motes:goldenCode.dustCount,statueRotations:statues.map(statue=>statue.rotation.y),elapsed:time,architecture:state.architecture,floorInserts:state.floorInserts};
+   window.__acnJourney={canvasCount:root.querySelectorAll('canvas').length,quality:mobile?'mobile':'desktop',residentModels:statues.length,modelNames:statues.map(s=>s.userData.modelName),shadows:renderer.shadowMap.enabled,postprocessing:!mobile,progress:p,room:p<.14?'entrance':p<.35?'services':p<.7?'process':p<.9?'security':'final',models:state.loaded,camera:point.toArray(),frames:state.frames,glyphs:goldenCode.count,motes:goldenCode.dustCount,statueRotations:statues.map(statue=>statue.rotation.y),elapsed:time,architecture:state.architecture,floorInserts:state.floorInserts};
   }
   raf=requestAnimationFrame(render);
  }
@@ -183,11 +204,13 @@ async function start(){
  document.addEventListener('visibilitychange',resume);
  function resize(){if(stopped)return;measure();camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight);ScrollTrigger.refresh();}addEventListener('resize',resize);
  function disposeObject(object){object.traverse(node=>{if(node.geometry)node.geometry.dispose();const materials=Array.isArray(node.material)?node.material:[node.material];materials.filter(Boolean).forEach(material=>{Object.values(material).forEach(value=>{if(value?.isTexture)value.dispose();});material.dispose();});});}
- dispose=()=>{if(stopped)return;stopped=true;cancelAnimationFrame(raf);trigger.kill();document.removeEventListener('visibilitychange',resume);removeEventListener('pointermove',onPointer);removeEventListener('resize',resize);disposeObject(scene);environment.dispose();composer.dispose();renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();document.body.classList.remove('scene-ready');entranceCopy.style.opacity='1';};
- await load('oracle',2);if(reason()){dispose();status.textContent=reason();return;}
- loadColumn().then(()=>{if(!stopped)loadFloorInserts();});
+ dispose=()=>{if(stopped)return;stopped=true;cancelAnimationFrame(raf);trigger.kill();document.removeEventListener('visibilitychange',resume);removeEventListener('pointermove',onPointer);removeEventListener('resize',resize);disposeObject(scene);environment.dispose();composer.dispose();renderer.dispose();renderer.forceContextLoss();renderer.domElement.remove();document.body.classList.remove('scene-ready');document.documentElement.classList.remove('scene-preview');entranceCopy.style.opacity='1';};
+ await Promise.all([load('oracle',2),mobile?Promise.resolve():loadColumn()]);if(reason()){dispose();status.textContent=reason();return;}
+ if(!mobile)loadFloorInserts();
+ camera.position.copy(route.getPoint(0));const firstTarget=lookRoute.getPoint(0);firstTarget.x-=mobile?0:1.05;camera.lookAt(firstTarget);
+ await renderer.compileAsync(scene,camera);composer.render();
  document.body.classList.add('scene-ready');root.dataset.state='ready';resume();addEventListener('pagehide',dispose,{once:true});
- }catch(error){dispose();root.dataset.state='fallback';status.textContent='Постери · 3D тимчасово недоступне';console.warn('ACN journey fallback',error.message);}
+ }catch(error){dispose();document.documentElement.classList.remove('scene-preview');root.dataset.state='fallback';status.textContent='Постери · 3D тимчасово недоступне';console.warn('ACN journey fallback',error.message);}
 }
 // Keep the first paint and HTML interaction independent of the 3D engine.
-if('requestIdleCallback' in window)requestIdleCallback(start,{timeout:2200});else setTimeout(start,1200);
+start();

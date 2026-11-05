@@ -1,5 +1,15 @@
 <!doctype html>
-<html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="uk"><head><script>// Inlined in the head: choose the first-paint treatment before content is drawn.
+(()=>{
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches||navigator.hardwareConcurrency<=4||navigator.connection?.saveData||!window.WebGL2RenderingContext)return;
+ document.documentElement.classList.add('scene-preview');
+ const mobile=matchMedia('(max-width:900px), (pointer:coarse)').matches;
+ function preload(rel,href,as){const link=document.createElement('link');link.rel=rel;link.href=href;if(as)link.as=as;if(as==='fetch'||rel==='modulepreload')link.crossOrigin='anonymous';document.head.append(link);}
+ preload('preload',`assets/3d/temple-entry${mobile?'-mobile':''}.webp`,'image');
+ preload('preload',`assets/3d/oracle${mobile?'-mobile':''}.glb`,'fetch');
+ preload('modulepreload','https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js');
+})();
+</script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AstraCoreNova — цифрові працівники для бізнесу | AI-автоматизація в Україні</title>
 <meta name="description" content="Цифрові працівники на основі ШІ для малого та середнього бізнесу: заявки, клієнти, CRM, документи. Пілот 14 днів з вимірюваним результатом.">
 <meta name="theme-color" content="#07070a"><link rel="canonical" href="https://astracorenova.com/">

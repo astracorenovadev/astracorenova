@@ -3,23 +3,32 @@
     {
       "desktop": {
         "canvasCount": 1,
+        "quality": "desktop",
+        "residentModels": 3,
+        "modelNames": [
+          "oracle",
+          "colossus",
+          "madonna"
+        ],
+        "shadows": true,
+        "postprocessing": true,
         "progress": 1,
         "room": "final",
         "models": 3,
         "camera": [
-          0.09021270521660205,
-          2.666482022912562,
+          0.08185677683259877,
+          2.6648333623014446,
           -90
         ],
-        "frames": 160,
+        "frames": 142,
         "glyphs": 520,
         "motes": 580,
         "statueRotations": [
-          0.37617094932245904,
-          0.37457137195557527,
-          0.3414613822306441
+          0.3335309464576369,
+          0.336944968623631,
+          0.3066438713538821
         ],
-        "elapsed": 6.544200000000007,
+        "elapsed": 5.774499999999728,
         "architecture": true,
         "floorInserts": true
       },
@@ -38,6 +47,90 @@
       "canvas": 0,
       "broken": [],
       "language": "uk"
+    },
+    {
+      "mobileRoom": "services",
+      "canvasCount": 1,
+      "quality": "mobile",
+      "residentModels": 1,
+      "modelNames": [
+        "colossus"
+      ],
+      "shadows": false,
+      "postprocessing": false,
+      "progress": 0.23946035667924828,
+      "room": "services",
+      "models": 2,
+      "camera": [
+        0.08148519006125131,
+        2.67889445900895,
+        -22.030569268299836
+      ],
+      "frames": 27,
+      "glyphs": 180,
+      "motes": 150,
+      "statueRotations": [
+        0.077177349929436
+      ],
+      "elapsed": 1.3137999999999066,
+      "architecture": false,
+      "floorInserts": false
+    },
+    {
+      "mobileRoom": "security",
+      "canvasCount": 1,
+      "quality": "mobile",
+      "residentModels": 1,
+      "modelNames": [
+        "madonna"
+      ],
+      "shadows": false,
+      "postprocessing": false,
+      "progress": 0.7587516656750395,
+      "room": "security",
+      "models": 3,
+      "camera": [
+        0.08235714274159431,
+        2.6964072263008783,
+        -64.35921785158335
+      ],
+      "frames": 35,
+      "glyphs": 180,
+      "motes": 150,
+      "statueRotations": [
+        0.10057801371848782
+      ],
+      "elapsed": 1.7132999999999066,
+      "architecture": false,
+      "floorInserts": false
+    },
+    {
+      "mobileRoom": "hero",
+      "canvasCount": 1,
+      "quality": "mobile",
+      "residentModels": 1,
+      "modelNames": [
+        "oracle"
+      ],
+      "shadows": false,
+      "postprocessing": false,
+      "progress": 0.075287129713464,
+      "room": "entrance",
+      "models": 5,
+      "camera": [
+        0.15849323424697676,
+        2.647718342412675,
+        -0.7924794114196905
+      ],
+      "frames": 71,
+      "glyphs": 180,
+      "motes": 150,
+      "statueRotations": [
+        0.20103627560648535
+      ],
+      "elapsed": 3.4412999999999054,
+      "architecture": false,
+      "floorInserts": false
     }
   ],
   "errors": []
