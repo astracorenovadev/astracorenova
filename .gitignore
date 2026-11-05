@@ -1,0 +1,8 @@
+node_modules/
+.env
+.env.*
+Meshy_AI_*
+**/Meshy_AI_*
+*.bundle
+docs/review/raw/
+__pycache__/

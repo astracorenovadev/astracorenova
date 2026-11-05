@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /docs/
+Disallow: /scripts/
+Sitemap: https://astracorenova.com/sitemap.xml

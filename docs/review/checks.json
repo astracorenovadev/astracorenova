@@ -1,0 +1,44 @@
+{
+  "results": [
+    {
+      "desktop": {
+        "canvasCount": 1,
+        "progress": 1,
+        "room": "final",
+        "models": 3,
+        "camera": [
+          0.09021270521660205,
+          2.666482022912562,
+          -90
+        ],
+        "frames": 160,
+        "glyphs": 520,
+        "motes": 580,
+        "statueRotations": [
+          0.37617094932245904,
+          0.37457137195557527,
+          0.3414613822306441
+        ],
+        "elapsed": 6.544200000000007,
+        "architecture": true,
+        "floorInserts": true
+      },
+      "mailto": "mailto:contact@astracorenova.com?subject=%D0%A6%D0%B8%D1%84%D1%80%D0%BE%D0%B2%D0%B8%D0%B9%20%D0%BF%D1%80%D0%B0%D1%86%D1%96%D0%B2%D0%BD%D0%B8%D0%BA%20%D0%B4%D0%BB%D1%8F%20%D0%B1%D1%96%D0%B7%D0%BD%D0%B5%D1%81%D1%83"
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "canvas": 0,
+      "broken": [],
+      "language": "uk"
+    },
+    {
+      "width": 360,
+      "overflow": false,
+      "canvas": 0,
+      "broken": [],
+      "language": "uk"
+    }
+  ],
+  "errors": []
+}
