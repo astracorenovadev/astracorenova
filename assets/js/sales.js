@@ -3,12 +3,19 @@
  const config=window.ACN_CONFIG||{},form=document.getElementById('business-quiz');
  const uk=()=>document.documentElement.lang!=='en',message=(a,b)=>uk()?a:b;
  const configured=(key)=>typeof config[key]==='string'&&config[key]!==key&&config[key].trim()!=='';
- const hero=document.getElementById('hero-primary-cta'),sticky=document.querySelector('.persistent-contact');
- if(hero&&sticky){
-  let heroVisible=true,quizVisible=false;
-  const sync=()=>sticky.hidden=heroVisible||quizVisible;
-  new IntersectionObserver(entries=>{heroVisible=entries[0].isIntersecting;sync();},{threshold:0}).observe(hero);
-  if(form)new IntersectionObserver(entries=>{quizVisible=entries[0].isIntersecting;sync();},{threshold:0}).observe(form);
+ const sticky=document.querySelector('.persistent-contact');
+ if(sticky){
+  const visibleActions=new Set();
+  const observer=new IntersectionObserver(entries=>{
+   entries.forEach(entry=>{
+    if(entry.isIntersecting&&entry.intersectionRect.width>0&&entry.intersectionRect.height>0)visibleActions.add(entry.target);
+    else visibleActions.delete(entry.target);
+   });
+   sticky.hidden=visibleActions.size>0;
+  },{threshold:0});
+  document.querySelectorAll('main .button, main button, main .card-link, main .text-button, main .studio-contact, main summary, main a[href="#contact"]').forEach(action=>observer.observe(action));
+  if(form)observer.observe(form);
+  const success=document.getElementById('quiz-success');if(success)observer.observe(success);
  }
 
  document.querySelectorAll('[data-telegram]').forEach(link=>{

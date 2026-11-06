@@ -100,3 +100,13 @@ body{font-size:16px;line-height:1.75}
 #quiz-captcha{min-height:0;margin-top:20px}
 @media(max-width:800px){.footer-contact-group .studio-contacts{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.quiz-intro{grid-template-columns:minmax(0,1fr)}.studio-contacts{gap:8px 12px;grid-template-columns:repeat(2,minmax(0,1fr))}.studio-contact{font-size:15px;gap:7px}.studio-contact svg{width:20px;height:20px;flex-basis:20px}.temple-site .contact-availability{font-size:12px;line-height:1.8}.pricing-disclaimer{font-size:12px}.temple-site .site-footer{padding-bottom:105px}}
+/* A consistent readable floor, including nested rules inherited from the original layout. */
+.temple-site .difference-grid p,.temple-site .section-description,.temple-site .services-intro p:not(.editorial){font-size:16px;line-height:1.8}
+.temple-site .extra-services h3{font-size:18px;line-height:1.5}
+.temple-site .card-link,.temple-site .card-link span{font-size:15px;line-height:1.6}
+.temple-site .difference-grid h3{font-size:18px;line-height:1.5}
+.temple-site .button,.temple-site .text-button{font-size:15px}
+.temple-site .brand small,.temple-site .language-switch,.temple-site .language-switch button,.temple-site .language-switch span,.temple-site .model-coordinate,.temple-site .vertical-motto,.temple-site .hero-topline span,.temple-site .hero-bottom>span,.temple-site .studio-emblem small,.temple-site .studio-layout .latin,.temple-site .quiz-progress-header .latin{font-size:12px!important;line-height:1.7}
+.temple-site .language-switch button{padding-inline:5px}
+@media(max-width:600px){.temple-site .card-link,.temple-site .card-link span{font-size:16px}.temple-site .hero-topline{font-size:12px}.temple-site .vertical-motto{font-size:12px}.temple-site .brand small{display:none}}
+@media(max-width:600px){.temple-site .button,.temple-site .text-button{font-size:16px!important}}
