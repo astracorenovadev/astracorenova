@@ -16,9 +16,6 @@
    try{const url=new URL(config.TELEGRAM_URL);if(url.protocol==='https:'&&['t.me','telegram.me'].includes(url.hostname)){link.href=url.href;link.removeAttribute('aria-disabled');link.querySelector('[data-telegram-note]')?.remove();}}catch{}
   }
  });
- if(configured('CF_BEACON_TOKEN')&&/^[a-f\d]{32}$/i.test(config.CF_BEACON_TOKEN)){
-  const script=document.createElement('script');script.src='https://static.cloudflareinsights.com/beacon.min.js';script.defer=true;script.dataset.cfBeacon=JSON.stringify({token:config.CF_BEACON_TOKEN});document.body.append(script);
- }
  const ranges=['people','hours','salary'].map(id=>document.getElementById('calc-'+id));
  function calculate(){
   if(ranges.some(input=>!input))return;
@@ -47,8 +44,8 @@
  }
  function updateContact(){
   const input=form.elements.contact,method=form.elements.contact_method.value;
-  input.type=method==='email'?'email':method==='phone'?'tel':'text';
-  input.autocomplete=method==='email'?'email':method==='phone'||method==='Viber'?'tel':'off';
+  input.type=method==='email'?'email':['phone','WhatsApp'].includes(method)?'tel':'text';
+  input.autocomplete=method==='email'?'email':['phone','WhatsApp'].includes(method)?'tel':'off';
   document.getElementById('contact-hint').textContent=method==='Telegram'?'@username':method==='email'?'name@example.com':message('Номер з кодом країни, наприклад +380…','Include your country code, e.g. +380…');
  }
  form.elements.contact_method.addEventListener('change',updateContact);updateContact();
@@ -83,6 +80,7 @@
   const captcha=widget!==null?window.hcaptcha?.getResponse(widget):'';
   if(!captcha){fail(message('Підтвердьте, що ви не робот.','Please complete the verification.'));loadCaptcha();return;}
   const data=Object.fromEntries(new FormData(form));data.access_key=config.WEB3FORMS_KEY;data.subject=`Заявка: ${selected('industry')[0]}, ${selected('team')[0]}`;data.tasks=selected('tasks').join('; ');data['h-captcha-response']=captcha;data.consent='yes';delete data.botcheck;
+  data.from_name='Сайт AstraCoreNova';
   if(data.contact_method==='email')data.email=data.contact;
   sending=true;submit.disabled=true;back.disabled=true;form.setAttribute('aria-busy','true');
   const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),15000);

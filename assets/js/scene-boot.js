@@ -6,5 +6,6 @@
  if(!window.ACN_SCENE_ALLOWED)return;
  document.documentElement.classList.add('scene-preview');
  function preload(rel,href,as){const link=document.createElement('link');link.rel=rel;link.href=href;if(as)link.as=as;if(as==='fetch'||rel==='modulepreload')link.crossOrigin='anonymous';document.head.append(link);}
- preload('preload',`assets/3d/temple-entry${mobile?'-mobile':''}.webp`,'image');
+ const wide=!mobile&&matchMedia('(min-aspect-ratio:8/5)').matches;
+ preload('preload',`assets/3d/temple-entry${mobile?'-mobile':wide?'-wide':''}.webp`,'image');
 })();
