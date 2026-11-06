@@ -6,3 +6,6 @@ Meshy_AI_*
 *.bundle
 docs/review/raw/
 __pycache__/
+/docs/
+/scripts/
+/assets/brand/acn-winged-a-gold-source.png
